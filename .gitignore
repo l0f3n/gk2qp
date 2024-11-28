@@ -1,3 +1,4 @@
-Takeout/
-backup.json
+*.json
+*.zip
+*.tgz
 

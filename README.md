@@ -19,8 +19,6 @@ Not supported:
 ## Usage instructions
 
  1. Export your Google Keep data from [Google Takeout](https://takeout.google.com/).
- 2. Unpack it.
- 3. Run `./gk2qp.py <root>`, pointing to the folder you unpacked your data.
- 4. Zip the resulting `backup.json` file.
- 5. Go to Quillpad->Settings->Restore and choose to import the file you just created.
+ 2. Run `./gk2qp.py <takeout>`, pointing to the exported Google Keep archive.
+ 3. In Quillpad, go to Settings->Restore and choose to import the newly created backup.
 

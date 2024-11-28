@@ -3,7 +3,9 @@
 import argparse
 import json
 from pathlib import Path
+import shutil
 import sys
+import tempfile
 
 
 supported_colors = {
@@ -119,20 +121,30 @@ def extract_tags(filepath):
 
 
 def main(args):
-    root = Path(args.root)
+    tmpdir = tempfile.gettempdir()
+    filename = Path(args.takeout)
+    shutil.unpack_archive(filename, tmpdir)
+    takeoutdir = Path(f'{tmpdir}/Takeout')
 
-    labels_filepaths = list(root.glob('**/Labels.txt'))
+    labels_filepaths = list(takeoutdir.glob('**/Labels.txt'))
     if len(labels_filepaths) == 1:
         tags = extract_tags(labels_filepaths[0])
     else:
         print(f'Found {len(labels_filepaths)} label files, skipping tags...')
         tags = []
 
-    qp_notes = convert_notes(root.glob('**/*.json'), tags)
+    qp_notes = convert_notes(takeoutdir.glob('**/*.json'), tags)
 
-    with open(args.outfile, 'w') as f:
+    tmpoutdir = tempfile.mkdtemp()
+    with open(f'{tmpoutdir}/backup.json', 'w') as f:
         f.write(json.dumps(qp_notes))
 
+    archive = shutil.make_archive(f'quillpad-{filename.stem}', 'zip', root_dir=tmpoutdir)
+
+    shutil.rmtree(takeoutdir)
+    shutil.rmtree(tmpoutdir)
+
+    print(f'Created Quillpad backup: {archive}')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -140,14 +152,9 @@ if __name__ == '__main__':
         description='Converts Google Keep notes to Quillpad notes',
     )
 
-    parser.add_argument('root',
-                        help='Path to folder containing Google Keep notes (e.g. Takeout/)',
-                        )
-
-    parser.add_argument('-o', '--outfile',
-                        dest='outfile',
-                        help='Name of the output file (default: %(default)s)',
-                        default='backup.json')
+    parser.add_argument('takeout',
+                        help='Path to takeout archive containing Google Keep notes',
+    )
 
     args = parser.parse_args()
 
