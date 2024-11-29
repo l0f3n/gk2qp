@@ -8,13 +8,22 @@ import sys
 import tempfile
 
 
-supported_colors = {
-    'GREEN',
-    'PINK',
-    'BLUE',
-    'RED',
-    'ORANGE',
-    'YELLOW',
+colors = {
+    'GREEN':  'Green',
+    'PINK':   'Pink',
+    'BLUE':   'Blue',
+    'RED':    'Red',
+    'ORANGE': 'Orange',
+    'YELLOW': 'Yellow',
+}
+
+
+extra_colors = {
+    'CERULEAN': 'Blue',
+    # 'GRAY':     'Default',
+    'BROWN':    'Orange',
+    'PURPLE':   'Pink',
+    'TEAL':     'Blue',
 }
 
 
@@ -39,8 +48,8 @@ def convert_note(id, filepath):
     if gk['isTrashed']:
         qp['isDeleted'] = True
 
-    if gk['color'] in supported_colors:
-        qp['color'] = gk['color'].capitalize()
+    if gk['color'] in colors:
+        qp['color'] = colors[gk['color']]
 
     if 'textContent' in gk:
         qp['content'] = gk['textContent']
@@ -126,6 +135,9 @@ def main(args):
     shutil.unpack_archive(filename, tmpdir)
     takeoutdir = Path(f'{tmpdir}/Takeout')
 
+    if args.use_extra_colors:
+        colors.update(extra_colors)
+
     labels_filepaths = list(takeoutdir.glob('**/Labels.txt'))
     if len(labels_filepaths) == 1:
         tags = extract_tags(labels_filepaths[0])
@@ -154,6 +166,12 @@ if __name__ == '__main__':
 
     parser.add_argument('takeout',
                         help='Path to takeout archive containing Google Keep notes',
+    )
+
+    parser.add_argument('-c', '--disable-extra-colors',
+                        dest='use_extra_colors',
+                        action='store_false',
+                        help='Map colors in Google Keep not supported in Quillpad to colorless, otherwise use the closest match',
     )
 
     args = parser.parse_args()
