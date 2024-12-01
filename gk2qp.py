@@ -67,7 +67,19 @@ def convert_note(id, filepath):
 
     tags = gk.get('labels', [])
 
-    return qp, tags
+    attachments = []
+    if 'attachments' in gk:
+        qp['attachments'] = []
+        for gka in gk['attachments']:
+            qpa = {
+                'description': gka['filePath'],
+                'fileName': gka['filePath'],
+            }
+            qp['attachments'].append(qpa)
+
+            attachments.append(gka['filePath'])
+
+    return qp, tags, attachments
 
 
 def convert_notes(filepaths, tags):
@@ -84,14 +96,18 @@ def convert_notes(filepaths, tags):
         'joins': [],
     }
 
+    attachments = []
+
     for i, filepath in enumerate(filepaths, start=1):
-        qp_note, note_tags = convert_note(i, filepath)
+        qp_note, note_tags, note_attachments = convert_note(i, filepath)
         qp_notes['notes'].append(qp_note)
 
         join_entries = create_join_entries(i, note_tags, tags)
         qp_notes['joins'].extend(join_entries)
 
-    return qp_notes
+        attachments.extend(note_attachments)
+
+    return qp_notes, attachments
 
 
 def tag_id_from_name(tags, name):
@@ -146,10 +162,15 @@ def main(args):
     if labels_filepath.is_file():
         tags = extract_tags(labels_filepath)
 
-    qp_notes = convert_notes(srcdir.glob('*.json'), tags)
+    qp_notes, attachments = convert_notes(srcdir.glob('*.json'), tags)
 
     with open(dstdir / 'backup.json', 'w') as f:
         f.write(json.dumps(qp_notes))
+
+    mediadir = dstdir / 'media'
+    mediadir.mkdir()
+    for attachment in attachments:
+        shutil.copy(srcdir / attachment, mediadir)
 
     archive = shutil.make_archive(f'quillpad-{src.stem}', 'zip', root_dir=dstdir)
 
@@ -157,6 +178,7 @@ def main(args):
     shutil.rmtree(dstdir)
 
     print(f'Created Quillpad backup: {archive}')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

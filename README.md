@@ -5,6 +5,8 @@ Feel free to submit an issue or create a PR if you find any issues!
 
 ## Features
 
+Everything is now supported, to my knowledge.
+
 Supports:
  - Title
  - Text and list notes
@@ -12,9 +14,7 @@ Supports:
  - Pinned, archived and deleted
  - Colors
  - Labels (tags in Quillpad) 
-
-Not supported:
- - Media
+ - Images (media in Quillpad) 
 
 ## Usage instructions
 
