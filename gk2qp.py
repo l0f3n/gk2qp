@@ -130,31 +130,31 @@ def extract_tags(filepath):
 
 
 def main(args):
-    tmpdir = tempfile.gettempdir()
-    filename = Path(args.takeout)
-    shutil.unpack_archive(filename, tmpdir)
-    takeoutdir = Path(f'{tmpdir}/Takeout')
+    tmpdir = Path(tempfile.gettempdir())
+
+    src = Path(args.takeout)
+    shutil.unpack_archive(src, tmpdir)
+
+    srcdir = tmpdir / 'Takeout' / 'Keep'
+    dstdir = Path(tempfile.mkdtemp())
 
     if args.use_extra_colors:
         colors.update(extra_colors)
 
-    labels_filepaths = list(takeoutdir.glob('**/Labels.txt'))
-    if len(labels_filepaths) == 1:
-        tags = extract_tags(labels_filepaths[0])
-    else:
-        print(f'Found {len(labels_filepaths)} label files, skipping tags...')
-        tags = []
+    labels_filepath = srcdir / 'Labels.txt'
+    tags = []
+    if labels_filepath.is_file():
+        tags = extract_tags(labels_filepath)
 
-    qp_notes = convert_notes(takeoutdir.glob('**/*.json'), tags)
+    qp_notes = convert_notes(srcdir.glob('*.json'), tags)
 
-    tmpoutdir = tempfile.mkdtemp()
-    with open(f'{tmpoutdir}/backup.json', 'w') as f:
+    with open(dstdir / 'backup.json', 'w') as f:
         f.write(json.dumps(qp_notes))
 
-    archive = shutil.make_archive(f'quillpad-{filename.stem}', 'zip', root_dir=tmpoutdir)
+    archive = shutil.make_archive(f'quillpad-{src.stem}', 'zip', root_dir=dstdir)
 
-    shutil.rmtree(takeoutdir)
-    shutil.rmtree(tmpoutdir)
+    shutil.rmtree(srcdir)
+    shutil.rmtree(dstdir)
 
     print(f'Created Quillpad backup: {archive}')
 
