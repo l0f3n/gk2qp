@@ -149,6 +149,8 @@ def main(args):
     tmpdir = Path(tempfile.gettempdir())
 
     src = Path(args.takeout)
+    dst = src.parent / f'quillpad-{src.stem}'
+
     shutil.unpack_archive(src, tmpdir)
 
     srcdir = tmpdir / 'Takeout' / 'Keep'
@@ -172,7 +174,7 @@ def main(args):
     for attachment in attachments:
         shutil.copy(srcdir / attachment, mediadir)
 
-    archive = shutil.make_archive(f'quillpad-{src.stem}', 'zip', root_dir=dstdir)
+    archive = shutil.make_archive(dst, 'zip', root_dir=dstdir)
 
     shutil.rmtree(srcdir)
     shutil.rmtree(dstdir)
