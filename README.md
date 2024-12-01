@@ -1,6 +1,6 @@
 # gk2qp - Import Google Keep notes into Quillpad
 
-Google Keep 2 Quillpad is a simple Python script that converts Google Keep notes exported from Google Takeout into [Quillpad](https://github.com/quillpad/quillpad) notes.
+Google Keep to Quillpad is a simple Python script that converts Google Keep notes exported from Google Takeout into [Quillpad](https://github.com/quillpad/quillpad) notes.
 Feel free to submit an issue or create a PR if you find any issues!
 
 ## Features
