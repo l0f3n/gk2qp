@@ -5,8 +5,6 @@ Feel free to submit an issue or create a PR if you find any issues!
 
 ## Features
 
-Everything is now supported, to my knowledge.
-
 Supports:
  - Title
  - Text and list notes
@@ -16,9 +14,8 @@ Supports:
  - Labels (tags in Quillpad) 
  - Images (media in Quillpad) 
 
-## Usage instructions
+## Usage
 
  1. Export your Google Keep data from [Google Takeout](https://takeout.google.com/).
  2. Run `./gk2qp.py <takeout>`, pointing to the exported Google Keep archive.
  3. In Quillpad, go to Settings->Restore and choose to import the newly created backup.
-
