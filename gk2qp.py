@@ -133,6 +133,9 @@ def create_join_entries(note_id, note_tags, tags):
 
 
 def extract_tags(filepath):
+    if not filepath.is_file():
+        return []
+
     tags = []
     with open(filepath) as f:
         for i, line in enumerate(f.readlines(), start=1):
@@ -159,11 +162,7 @@ def main(args):
     if args.use_extra_colors:
         colors.update(extra_colors)
 
-    labels_filepath = srcdir / 'Labels.txt'
-    tags = []
-    if labels_filepath.is_file():
-        tags = extract_tags(labels_filepath)
-
+    tags = extract_tags(srcdir / 'Labels.txt')
     qp_notes, attachments = convert_notes(srcdir.glob('*.json'), tags)
 
     with open(dstdir / 'backup.json', 'w') as f:
