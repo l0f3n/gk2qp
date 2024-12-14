@@ -165,6 +165,8 @@ def main(args):
     tags = extract_tags(srcdir / 'Labels.txt')
     qp_notes, attachments = convert_notes(srcdir.glob('*.json'), tags)
 
+    print(f'Converted {len(qp_notes['notes'])} notes with {len(tags)} tags and {len(attachments)} attachments')
+
     with open(dstdir / 'backup.json', 'w') as f:
         f.write(json.dumps(qp_notes))
 
