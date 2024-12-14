@@ -3,6 +3,7 @@
 import argparse
 import json
 from pathlib import Path
+import re
 import shutil
 import sys
 import tempfile
@@ -27,17 +28,26 @@ extra_colors = {
 }
 
 
+dtre = re.compile(r'^\d\d\d\d-\d\d-\d\dT\d\d_\d\d_\d\d.\d\d\d\+\d\d_\d\d$')
+
+
+def is_untitled(gk_name):
+    return dtre.match(gk_name) is not None
+
+
 def convert_note(id, filepath):
     with open(filepath) as f:
         gk = json.load(f)
 
     qp = {
-        'title': filepath.stem,
         'id': id,
         'creationDate': gk['createdTimestampUsec'] // 1_000_000,
         'modifiedDate': gk['userEditedTimestampUsec'] // 1_000_000,
         'notebookId': 1,
     }
+
+    if not is_untitled(filepath.stem):
+        qp['title'] = filepath.stem
 
     if gk['isArchived']:
         qp['isArchived'] = True
