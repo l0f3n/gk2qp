@@ -159,21 +159,22 @@ def extract_tags(filepath):
 
 
 def main(args):
-    tmpdir = Path(tempfile.gettempdir())
-
     src = Path(args.takeout)
-    dst = src.parent / f'quillpad-{src.stem}'
+    dst = f'quillpad-{src.stem}'
 
-    shutil.unpack_archive(src, tmpdir)
-
-    srcdir = tmpdir / 'Takeout' / 'Keep'
+    srcdir = Path(tempfile.mkdtemp())
     dstdir = Path(tempfile.mkdtemp())
+
+    shutil.unpack_archive(src, srcdir)
+
+    keepdir = srcdir / 'Takeout' / 'Keep'
 
     if args.use_extra_colors:
         colors.update(extra_colors)
 
-    tags = extract_tags(srcdir / 'Labels.txt')
-    qp_notes, attachments = convert_notes(srcdir.glob('*.json'), tags)
+    tags = extract_tags(keepdir / 'Labels.txt')
+
+    qp_notes, attachments = convert_notes(keepdir.glob('*.json'), tags)
 
     print(f'Converted {len(qp_notes['notes'])} notes with {len(tags)} tags and {len(attachments)} attachments')
 
@@ -183,7 +184,7 @@ def main(args):
     mediadir = dstdir / 'media'
     mediadir.mkdir()
     for attachment in attachments:
-        shutil.copy(srcdir / attachment, mediadir)
+        shutil.copy(keepdir / attachment, mediadir)
 
     archive = shutil.make_archive(dst, 'zip', root_dir=dstdir)
 
