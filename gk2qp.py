@@ -176,7 +176,11 @@ def main(args):
 
     qp_notes, attachments = convert_notes(keepdir.glob('*.json'), tags)
 
-    print(f'Converted {len(qp_notes['notes'])} notes with {len(tags)} tags and {len(attachments)} attachments')
+    noteLen = len(qp_notes['notes'])
+    tagLen = len(tags)
+    attachmentLen = len(attachments)
+
+    print(f'Converted {noteLen} notes with {tagLen} tags and {attachmentLen} attachments')
 
     with open(dstdir / 'backup.json', 'w') as f:
         f.write(json.dumps(qp_notes))
