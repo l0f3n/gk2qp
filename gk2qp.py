@@ -200,7 +200,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        prog='gk2gp',
+        prog='gk2qp',
         description='Converts Google Keep notes to Quillpad notes',
     )
 
