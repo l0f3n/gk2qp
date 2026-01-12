@@ -36,7 +36,7 @@ def is_untitled(gk_name):
 
 
 def convert_note(id, filepath):
-    with open(filepath) as f:
+    with open(filepath, encoding='utf-8') as f:
         gk = json.load(f)
 
     qp = {
@@ -147,7 +147,7 @@ def extract_tags(filepath):
         return []
 
     tags = []
-    with open(filepath) as f:
+    with open(filepath, encoding='utf-8') as f:
         for i, line in enumerate(f.readlines(), start=1):
             tag = {
                 'id': i,
@@ -182,7 +182,7 @@ def main(args):
 
     print(f'Converted {noteLen} notes with {tagLen} tags and {attachmentLen} attachments')
 
-    with open(dstdir / 'backup.json', 'w') as f:
+    with open(dstdir / 'backup.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(qp_notes))
 
     mediadir = dstdir / 'media'
