@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gk2qp</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --border: #b9c2cf;
+    --border-active: #2f6fed;
+    --error: #d64545;
+    --text: #5b6472;
+    --text-dim: #8089a0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15181d;
+      --card: #1d2128;
+      --border: #3a4552;
+      --border-active: #5b8def;
+      --error: #e2685f;
+      --text: #9aa3ad;
+      --text-dim: #6b7380;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  a { color: inherit; }
+  main {
+    margin: auto 0;
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  #drop {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: opacity .15s, border-color .15s;
+  }
+  #drop:hover, #drop.over { border-color: var(--border-active); }
+  #drop.busy { opacity: .6; pointer-events: none; }
+  #drop.error { border-color: var(--error); }
+  #drop.error #status { color: var(--error); font-size: .8rem; word-break: break-word; }
+  #drop input { display: none; }
+  #drop svg { width: 32px; height: 32px; fill: none; stroke: var(--border); stroke-width: 1.5; stroke-linejoin: round; }
+
+  #results {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #results li {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #results .meta { flex: 1; min-width: 0; }
+  #results .name {
+    font-size: .85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #results .stats { font-size: .75rem; color: var(--text-dim); }
+  #results li.empty { border-color: var(--error); color: var(--error); }
+  #results a, #results span { display: flex; }
+  #results svg { width: 18px; height: 18px; fill: currentColor; }
+
+  footer { font-size: .85rem; }
+  footer a { display: inline-flex; align-items: center; gap: 6px; }
+  footer svg { width: 16px; height: 16px; fill: currentColor; }
+</style>
+</head>
+<body>
+  <main>
+    <label id="drop">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 3h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
+        <path d="M14 3v6h6"/>
+      </svg>
+      <span id="status">Drop the takeout.zip file here to convert it</span>
+      <input type="file" id="file" accept=".zip,.tgz,.tar.gz" multiple>
+    </label>
+    <ul id="results"></ul>
+  </main>
+  <footer>
+    <a href="https://github.com/l0f3n/gk2qp" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      gk2qp
+    </a>
+  </footer>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.29.5/full/pyodide.js"></script>
+<script>
+const drop = document.getElementById('drop');
+const message = document.getElementById('status');
+const input = document.getElementById('file');
+const results = document.getElementById('results');
+const idleText = message.textContent;
+
+const downloadIcon = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11 3 6h3V1h4v5h3z"/><path d="M2 13h12v2H2z"/></svg>';
+const crossIcon = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 2 8 6.5 12.5 2 14 3.5 9.5 8 14 12.5 12.5 14 8 9.5 3.5 14 2 12.5 6.5 8 2 3.5z"/></svg>';
+
+const pythonConvert = (async () => {
+  const pyodide = await loadPyodide();
+  pyodide.FS.writeFile('/gk2qp.py', await (await fetch('gk2qp.py')).text());
+  pyodide.runPython(`
+import contextlib, io, os, sys, types
+sys.path.insert(0, '/')
+import gk2qp
+
+os.makedirs('/work', exist_ok=True)
+os.chdir('/work')
+
+def convert(path):
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        gk2qp.main(types.SimpleNamespace(takeout=path))
+    return out.getvalue()
+`);
+  return { FS: pyodide.FS, run: pyodide.globals.get('convert') };
+})();
+
+async function convertOne(file) {
+  const { FS, run } = await pythonConvert;
+  const name = file.name.replace(/[^A-Za-z0-9._-]/g, '_');
+  const outName = 'quillpad-' + name.replace(/\.[^.]+$/, '') + '.zip';
+
+  FS.writeFile('/work/' + name, new Uint8Array(await file.arrayBuffer()));
+  const output = run('/work/' + name);
+  const bytes = FS.readFile('/work/' + outName);
+  FS.unlink('/work/' + name);
+  FS.unlink('/work/' + outName);
+
+  const m = output.match(/Converted (\d+) notes with (\d+) tags and (\d+) attachments/);
+  const stats = m ? `${m[1]} notes · ${m[2]} tags · ${m[3]} attachments` : '';
+  const empty = m && m.slice(1).every(n => n === '0');
+
+  const action = empty
+    ? `<span title="No notes found">${crossIcon}</span>`
+    : `<a href="${URL.createObjectURL(new Blob([bytes]))}" download="${outName}" title="Download ${outName}">${downloadIcon}</a>`;
+
+  results.insertAdjacentHTML('afterbegin', `
+    <li${empty ? ' class="empty"' : ''}>
+      <div class="meta">
+        <div class="name">${outName}</div>
+        <div class="stats">${stats}</div>
+      </div>
+      ${action}
+    </li>
+  `);
+}
+
+async function convert(files) {
+  message.textContent = 'Converting…';
+  drop.className = 'busy';
+  // Python runs synchronously and blocks the tab, so let the browser paint first.
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  try {
+    for (const file of files) await convertOne(file);
+    message.textContent = idleText;
+    drop.className = '';
+  } catch (err) {
+    console.error(err);
+    message.textContent = String(err?.message ?? err).trim().split('\n').pop();
+    drop.className = 'error';
+  }
+}
+
+input.addEventListener('change', () => {
+  if (input.files.length) convert(input.files);
+  input.value = '';
+});
+
+// Stop the browser from opening files dropped anywhere on the page.
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => e.preventDefault());
+
+drop.addEventListener('dragover', () => drop.classList.add('over'));
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', e => {
+  drop.classList.remove('over');
+  if (e.dataTransfer.files.length) convert(e.dataTransfer.files);
+});
+</script>
+</body>
+</html>
