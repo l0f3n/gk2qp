@@ -10,12 +10,17 @@ import tempfile
 
 
 colors = {
-    'GREEN':  'Green',
-    'PINK':   'Pink',
-    'BLUE':   'Blue',
-    'RED':    'Red',
-    'ORANGE': 'Orange',
-    'YELLOW': 'Yellow',
+    'RED':      'Red',
+    'ORANGE':   'Orange',
+    'YELLOW':   'Yellow',
+    'GREEN':    'Green',
+    'TEAL':     'Teal',
+    'BLUE':     'Cyan',
+    'CERULEAN': 'Blue',
+    'PURPLE':   'Purple',
+    'PINK':     'Pink',
+    'BROWN':    'Brown',
+    'GRAY':     'Gray',
 }
 
 
