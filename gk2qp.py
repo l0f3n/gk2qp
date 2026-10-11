@@ -19,15 +19,6 @@ colors = {
 }
 
 
-extra_colors = {
-    'CERULEAN': 'Blue',
-    # 'GRAY':     'Default',
-    'BROWN':    'Orange',
-    'PURPLE':   'Pink',
-    'TEAL':     'Blue',
-}
-
-
 dtre = re.compile(r'^\d\d\d\d-\d\d-\d\dT\d\d_\d\d_\d\d.\d\d\d\+\d\d_\d\d$')
 
 
@@ -169,9 +160,6 @@ def main(args):
 
     keepdir = srcdir / 'Takeout' / 'Keep'
 
-    if args.use_extra_colors:
-        colors.update(extra_colors)
-
     tags = extract_tags(keepdir / 'Labels.txt')
 
     qp_notes, attachments = convert_notes(keepdir.glob('*.json'), tags)
@@ -206,12 +194,6 @@ if __name__ == '__main__':
 
     parser.add_argument('takeout',
                         help='Path to takeout archive containing Google Keep notes',
-    )
-
-    parser.add_argument('-c', '--disable-extra-colors',
-                        dest='use_extra_colors',
-                        action='store_false',
-                        help='Map colors in Google Keep not supported in Quillpad to colorless, otherwise use the closest match',
     )
 
     args = parser.parse_args()
