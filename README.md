@@ -17,5 +17,10 @@ Supports:
 ## Usage
 
  1. Export your Google Keep data from [Google Takeout](https://takeout.google.com/).
- 2. Run `./gk2qp.py <takeout>`, pointing to the exported Google Takeout archive.
+ 2. Convert your notes on [l0f3n.github.io/gk2qp](https://l0f3n.github.io/gk2qp/).
  3. In Quillpad, go to Settings->Restore and import the newly created backup.
+
+## Privacy
+
+The website used to convert the notes is statically hosted on GitHub Pages, which means that no data you upload to it ever leaves your browser.
+
